@@ -1,0 +1,503 @@
+@import "tailwindcss";
+
+/* ===========================================================================
+   PakOption design tokens — Tailwind CSS v4 (@theme, no config file)
+   Reference: docs/DESIGN_SYSTEM.md
+   =========================================================================== */
+
+@theme {
+  /* --- Surfaces ---------------------------------------------------------- */
+  --color-ink: #04140e;
+  --color-ink-2: #071b13;
+  --color-surface: #0a2119;
+  --color-surface-2: #0e2c21;
+  --color-line: #17392b;
+  --color-line-strong: #1f4a37;
+
+  /* --- Brand ------------------------------------------------------------- */
+  --color-brand-50: #e9fbf2;
+  --color-brand-100: #c9f5e0;
+  --color-brand-200: #9aecc6;
+  --color-brand-300: #5fe8ac;
+  --color-brand-400: #2dd48a;
+  --color-brand-500: #12b76a;
+  --color-brand-600: #0e9558;
+  --color-brand-700: #0b6b45;
+  --color-brand-800: #084d33;
+  --color-brand-900: #062b1e;
+
+  /* --- Accents ----------------------------------------------------------- */
+  --color-gold: #f5b301;
+  --color-gold-soft: #ffd666;
+  --color-gold-dim: #a87c05;
+  --color-danger: #e5484d;
+  --color-danger-soft: #ff8a8d;
+  --color-info: #4a9eff;
+
+  /* --- Text -------------------------------------------------------------- */
+  --color-ivory: #f4f7f5;
+  --color-muted: #8fa69a;
+  --color-muted-2: #5f776a;
+
+  /* --- Type -------------------------------------------------------------- */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* --- Radius ------------------------------------------------------------ */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+
+  /* --- Motion ------------------------------------------------------------ */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quad: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --- Animations -------------------------------------------------------- */
+  --animate-marquee: marquee 42s linear infinite;
+  --animate-marquee-slow: marquee 70s linear infinite;
+  --animate-shimmer: shimmer 2.2s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-pulse-ring: pulse-ring 2s ease-out infinite;
+  --animate-drift: drift 22s ease-in-out infinite alternate;
+  --animate-rise: rise 0.6s var(--ease-out-expo) both;
+  --animate-scan: scan 3.5s ease-in-out infinite;
+
+  /* Radix state transitions (replaces tailwindcss-animate, which is v3-only) */
+  --animate-fade-in: fade-in 200ms ease-out both;
+  --animate-fade-out: fade-out 160ms ease-in both;
+  --animate-pop-in: pop-in 240ms var(--ease-out-expo) both;
+  --animate-pop-out: pop-out 160ms ease-in both;
+  --animate-slide-up: slide-up 300ms var(--ease-out-expo) both;
+  --animate-slide-in-right: slide-in-right 320ms var(--ease-out-expo) both;
+  --animate-slide-out-right: slide-out-right 240ms ease-in both;
+  --animate-accordion-down: accordion-down 300ms var(--ease-out-expo) both;
+  --animate-accordion-up: accordion-up 240ms var(--ease-out-expo) both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.96) translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1) translateY(0);
+    }
+  }
+  @keyframes pop-out {
+    from {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.97);
+    }
+  }
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes slide-out-right {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes accordion-down {
+    from {
+      height: 0;
+      opacity: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+      opacity: 1;
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+      opacity: 1;
+    }
+    to {
+      height: 0;
+      opacity: 0;
+    }
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes shimmer {
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 0.9;
+    }
+  }
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.55;
+      transform: scale(0.86);
+    }
+  }
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.85);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(2.1);
+      opacity: 0;
+    }
+  }
+  @keyframes drift {
+    from {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+      transform: translate3d(4%, -3%, 0) scale(1.12);
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes scan {
+    0%,
+    100% {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    45%,
+    55% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100%);
+    }
+  }
+}
+
+/* ===========================================================================
+   Base
+   =========================================================================== */
+
+/* SVG stroke draw-on, used by the animated logo mark */
+@keyframes draw {
+  from {
+    stroke-dashoffset: 90;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-ivory);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-brand-500) 32%, transparent);
+    color: var(--color-ivory);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-400);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Numeric content must never jitter */
+  .tnum,
+  time[data-countdown],
+  [data-price] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-ink);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line-strong);
+    border-radius: 999px;
+    border: 2px solid var(--color-ink);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-brand-700);
+  }
+}
+
+/* ===========================================================================
+   Utilities
+   =========================================================================== */
+
+@utility container-page {
+  width: 100%;
+  max-width: 1400px;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (min-width: 768px) {
+    padding-inline: 2rem;
+  }
+  @media (min-width: 1280px) {
+    padding-inline: 3rem;
+  }
+}
+
+@utility shadow-card {
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.04),
+    0 12px 32px -12px rgb(0 0 0 / 0.6);
+}
+
+@utility shadow-lift {
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.07),
+    0 24px 56px -20px rgb(0 0 0 / 0.75);
+}
+
+@utility shadow-glow {
+  box-shadow:
+    0 0 0 1px rgb(18 183 106 / 0.3),
+    0 12px 48px -12px rgb(18 183 106 / 0.35);
+}
+
+@utility shadow-glow-gold {
+  box-shadow:
+    0 0 0 1px rgb(245 179 1 / 0.35),
+    0 12px 48px -12px rgb(245 179 1 / 0.3);
+}
+
+/* Gradient text */
+@utility text-gradient-brand {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-brand-300) 0%,
+    var(--color-brand-400) 45%,
+    var(--color-brand-600) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@utility text-gradient-gold {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-gold-soft) 0%,
+    var(--color-gold) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Hairline top highlight used on cards and panels */
+@utility edge-light {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 255 255 / 0.14),
+      transparent
+    );
+    pointer-events: none;
+  }
+}
+
+/* Faint blueprint grid */
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(18 183 106 / 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(18 183 106 / 0.055) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+@utility bg-grid-fade {
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 60% at 50% 0%,
+    #000 40%,
+    transparent 100%
+  );
+}
+
+/* Edge fade for marquees */
+@utility mask-edges {
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ===========================================================================
+   Component-level primitives that are easier as CSS than as class soup
+   =========================================================================== */
+
+@layer components {
+  /* Loading skeleton */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface) 25%,
+      var(--color-surface-2) 50%,
+      var(--color-surface) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-slide 1.6s ease-in-out infinite;
+    border-radius: var(--radius-md);
+  }
+
+  @keyframes shimmer-slide {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Live indicator dot with expanding ring */
+  .live-dot {
+    position: relative;
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--color-brand-400);
+  }
+  .live-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: var(--color-brand-400);
+    animation: pulse-ring 2s ease-out infinite;
+  }
+  .live-dot[data-urgent="true"],
+  .live-dot[data-urgent="true"]::after {
+    background: var(--color-danger);
+  }
+}
+
+/* ===========================================================================
+   Reduced motion — a hard global stop.
+   Components additionally read the flag via <MotionProvider> so that
+   JS-driven timelines (GSAP) are skipped rather than merely instantaneous.
+   =========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .live-dot::after {
+    display: none;
+  }
+}

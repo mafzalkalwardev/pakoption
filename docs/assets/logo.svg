@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 248 48" width="248" height="48" role="img" aria-label="PakOption">
+  <title>PakOption</title>
+  <defs>
+    <linearGradient id="lArc" x1="8" y1="40" x2="40" y2="8" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0B6B45"/>
+      <stop offset="45%" stop-color="#12B76A"/>
+      <stop offset="100%" stop-color="#5FE8AC"/>
+    </linearGradient>
+    <linearGradient id="lGold" x1="25" y1="21" x2="37" y2="13" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F5B301"/>
+      <stop offset="100%" stop-color="#FFD666"/>
+    </linearGradient>
+  </defs>
+
+  <g>
+    <path d="M10.57 37.43 A19 19 0 1 1 37.43 37.43"
+          fill="none" stroke="url(#lArc)" stroke-width="4" stroke-linecap="round"/>
+    <g stroke="#12B76A" stroke-width="2" stroke-linecap="round" opacity=".45">
+      <path d="M13.4 34.6 15.5 32.5"/>
+      <path d="M24 5.6 24 8.6"/>
+      <path d="M34.6 34.6 32.5 32.5"/>
+    </g>
+    <path d="M24 27 L29.5 19" stroke="#F4F7F5" stroke-width="3.4" stroke-linecap="round"/>
+    <rect x="25" y="14" width="12" height="6" rx="3" fill="url(#lGold)" transform="rotate(34.5 31 17)"/>
+    <circle cx="24" cy="27" r="3.6" fill="#F4F7F5"/>
+    <circle cx="24" cy="27" r="1.5" fill="#04140E"/>
+  </g>
+
+  <text x="58" y="32"
+        font-family="Geist, Inter, 'Segoe UI', system-ui, -apple-system, Arial, sans-serif"
+        font-size="25" font-weight="700" letter-spacing="-0.9" fill="#F4F7F5">Pak<tspan fill="#2DD48A">Option</tspan></text>
+</svg>

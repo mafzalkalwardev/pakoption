@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 248 48" width="248" height="48" role="img" aria-label="PakOption">
+  <title>PakOption</title>
+  <g fill="none" stroke="currentColor">
+    <path d="M10.57 37.43 A19 19 0 1 1 37.43 37.43" stroke-width="4" stroke-linecap="round"/>
+    <g stroke-width="2" stroke-linecap="round" opacity=".45">
+      <path d="M13.4 34.6 15.5 32.5"/>
+      <path d="M24 5.6 24 8.6"/>
+      <path d="M34.6 34.6 32.5 32.5"/>
+    </g>
+    <path d="M24 27 L29.5 19" stroke-width="3.4" stroke-linecap="round"/>
+  </g>
+  <rect x="25" y="14" width="12" height="6" rx="3" fill="currentColor" transform="rotate(34.5 31 17)"/>
+  <circle cx="24" cy="27" r="3.6" fill="currentColor"/>
+  <text x="58" y="32"
+        font-family="Geist, Inter, 'Segoe UI', system-ui, -apple-system, Arial, sans-serif"
+        font-size="25" font-weight="700" letter-spacing="-0.9" fill="currentColor">PakOption</text>
+</svg>

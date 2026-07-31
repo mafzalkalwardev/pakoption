@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="PakOption — Pakistan's inspection-backed car auction marketplace">
+  <title>PakOption</title>
+  <defs>
+    <linearGradient id="ogBg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#071B13"/>
+      <stop offset="100%" stop-color="#04140E"/>
+    </linearGradient>
+    <radialGradient id="ogGlow" cx="0.18" cy="0.12" r="0.75">
+      <stop offset="0%" stop-color="#12B76A" stop-opacity=".30"/>
+      <stop offset="100%" stop-color="#12B76A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ogGlow2" cx="0.9" cy="0.9" r="0.6">
+      <stop offset="0%" stop-color="#F5B301" stop-opacity=".16"/>
+      <stop offset="100%" stop-color="#F5B301" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ogArc" x1="30" y1="150" x2="150" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0B6B45"/>
+      <stop offset="45%" stop-color="#12B76A"/>
+      <stop offset="100%" stop-color="#5FE8AC"/>
+    </linearGradient>
+    <linearGradient id="ogGold" x1="100" y1="86" x2="150" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F5B301"/>
+      <stop offset="100%" stop-color="#FFD666"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#ogBg)"/>
+  <rect width="1200" height="630" fill="url(#ogGlow)"/>
+  <rect width="1200" height="630" fill="url(#ogGlow2)"/>
+
+  <!-- grid -->
+  <g stroke="#12B76A" stroke-opacity=".055">
+    <path d="M0 90h1200M0 180h1200M0 270h1200M0 360h1200M0 450h1200M0 540h1200"/>
+    <path d="M100 0v630M200 0v630M300 0v630M400 0v630M500 0v630M600 0v630M700 0v630M800 0v630M900 0v630M1000 0v630M1100 0v630"/>
+  </g>
+
+  <!-- mark -->
+  <g transform="translate(88 78) scale(1.7)">
+    <path d="M10.57 37.43 A19 19 0 1 1 37.43 37.43"
+          fill="none" stroke="url(#ogArc)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M24 27 L29.5 19" stroke="#F4F7F5" stroke-width="3.4" stroke-linecap="round"/>
+    <rect x="25" y="14" width="12" height="6" rx="3" fill="url(#ogGold)" transform="rotate(34.5 31 17)"/>
+    <circle cx="24" cy="27" r="3.6" fill="#F4F7F5"/>
+    <circle cx="24" cy="27" r="1.5" fill="#04140E"/>
+  </g>
+
+  <text x="176" y="128"
+        font-family="Geist, Inter, 'Segoe UI', system-ui, Arial, sans-serif"
+        font-size="44" font-weight="700" letter-spacing="-1.4" fill="#F4F7F5">Pak<tspan fill="#2DD48A">Option</tspan></text>
+
+  <text x="88" y="286"
+        font-family="Geist, Inter, 'Segoe UI', system-ui, Arial, sans-serif"
+        font-size="76" font-weight="700" letter-spacing="-3" fill="#F4F7F5">Every car verified.</text>
+  <text x="88" y="374"
+        font-family="Geist, Inter, 'Segoe UI', system-ui, Arial, sans-serif"
+        font-size="76" font-weight="700" letter-spacing="-3" fill="#2DD48A">Every price in the open.</text>
+
+  <text x="88" y="446"
+        font-family="Geist, Inter, 'Segoe UI', system-ui, Arial, sans-serif"
+        font-size="27" font-weight="400" fill="#8FA69A">Pakistan&#8217;s inspection-backed car auction marketplace</text>
+
+  <!-- stat chips -->
+  <g font-family="Geist, Inter, system-ui, Arial, sans-serif">
+    <rect x="88" y="500" width="252" height="62" rx="14" fill="#0A2119" stroke="#17392B"/>
+    <text x="112" y="527" font-size="15" font-weight="600" letter-spacing="1.6" fill="#8FA69A">LIVE AUCTIONS</text>
+    <text x="112" y="551" font-size="21" font-weight="700" fill="#F5B301">1,240+ lots</text>
+
+    <rect x="360" y="500" width="286" height="62" rx="14" fill="#0A2119" stroke="#17392B"/>
+    <text x="384" y="527" font-size="15" font-weight="600" letter-spacing="1.6" fill="#8FA69A">INSPECTION</text>
+    <text x="384" y="551" font-size="21" font-weight="700" fill="#2DD48A">200+ checkpoints</text>
+
+    <rect x="666" y="500" width="234" height="62" rx="14" fill="#0A2119" stroke="#17392B"/>
+    <text x="690" y="527" font-size="15" font-weight="600" letter-spacing="1.6" fill="#8FA69A">COVERAGE</text>
+    <text x="690" y="551" font-size="21" font-weight="700" fill="#F4F7F5">6 cities</text>
+  </g>
+</svg>

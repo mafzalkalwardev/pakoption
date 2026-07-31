@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="PakOption">
+  <title>PakOption</title>
+  <defs>
+    <linearGradient id="fBg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0A2119"/>
+      <stop offset="100%" stop-color="#04140E"/>
+    </linearGradient>
+    <linearGradient id="fArc" x1="14" y1="52" x2="50" y2="12" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0B6B45"/>
+      <stop offset="45%" stop-color="#12B76A"/>
+      <stop offset="100%" stop-color="#5FE8AC"/>
+    </linearGradient>
+    <linearGradient id="fGold" x1="34" y1="29" x2="50" y2="18" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F5B301"/>
+      <stop offset="100%" stop-color="#FFD666"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="15" fill="url(#fBg)"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="14.5" fill="none" stroke="#17392B"/>
+
+  <g transform="translate(8 8) scale(1)">
+    <g transform="scale(1)">
+      <path d="M10.57 37.43 A19 19 0 1 1 37.43 37.43"
+            fill="none" stroke="url(#fArc)" stroke-width="4.4" stroke-linecap="round"/>
+      <path d="M24 27 L29.5 19" stroke="#F4F7F5" stroke-width="3.6" stroke-linecap="round"/>
+      <rect x="25" y="14" width="12" height="6" rx="3" fill="url(#fGold)" transform="rotate(34.5 31 17)"/>
+      <circle cx="24" cy="27" r="3.6" fill="#F4F7F5"/>
+      <circle cx="24" cy="27" r="1.5" fill="#04140E"/>
+    </g>
+  </g>
+</svg>

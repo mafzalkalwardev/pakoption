@@ -1,0 +1,577 @@
+// PakOption — canonical data model
+// Reference: docs/DATA_MODEL.md
+//
+// MONEY RULE: every currency column is Int, in whole PKR. No Decimal, no Float.
+// Rupee amounts never have fractional parts here and float arithmetic on money
+// is how rounding bugs get into production.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/* -------------------------------------------------------------------------- */
+/* Enums                                                                      */
+/* -------------------------------------------------------------------------- */
+
+enum Role {
+  BUYER
+  SELLER
+  DEALER
+  INSPECTOR
+  ADMIN
+}
+
+enum VerificationTier {
+  NONE
+  EMAIL
+  PHONE
+  CNIC
+  DEALER_VERIFIED
+}
+
+enum ListingType {
+  AUCTION
+  CLASSIFIED
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING_REVIEW
+  LIVE
+  PAUSED
+  SOLD
+  EXPIRED
+  REJECTED
+}
+
+enum AuctionStatus {
+  SCHEDULED
+  LIVE
+  SOLD
+  RESERVE_NOT_MET
+  ENDED_NO_BIDS
+  CANCELLED
+}
+
+enum BidStatus {
+  LEADING
+  OUTBID
+  WON
+  LOST
+  VOIDED
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+  CVT
+  DCT
+  AMT
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  HYBRID
+  ELECTRIC
+  CNG
+  LPG
+}
+
+enum BodyType {
+  HATCHBACK
+  SEDAN
+  SUV
+  CROSSOVER
+  MPV
+  PICKUP
+  COUPE
+  CONVERTIBLE
+  WAGON
+  VAN
+}
+
+enum Assembly {
+  LOCAL
+  IMPORTED
+}
+
+enum InspectionPackage {
+  BASIC
+  STANDARD
+  COMPREHENSIVE
+}
+
+enum InspectionStatus {
+  REQUESTED
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum InspectionGrade {
+  A
+  B
+  C
+  D
+}
+
+enum ItemSeverity {
+  OK
+  ADVISORY
+  MINOR
+  MAJOR
+  CRITICAL
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COUNTERED
+  EXPIRED
+}
+
+enum OrderStatus {
+  PENDING_DEPOSIT
+  DEPOSIT_PAID
+  AWAITING_HANDOVER
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+/* -------------------------------------------------------------------------- */
+/* Users                                                                      */
+/* -------------------------------------------------------------------------- */
+
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  passwordHash String?
+  name         String
+
+  /// Public masked identity shown in bid logs, e.g. "bidder_4f9a".
+  handle String @unique
+
+  phone           String?   @unique
+  phoneVerifiedAt DateTime?
+
+  /// SHA-256 of the CNIC. The full number is never persisted.
+  cnicHash  String?
+  cnicLast4 String?
+
+  role   Role             @default(BUYER)
+  tier   VerificationTier @default(NONE)
+
+  avatarUrl String?
+  city      String?
+
+  rating     Float @default(0)
+  salesCount Int   @default(0)
+  strikes    Int   @default(0)
+
+  listings      Listing[]
+  bids          Bid[]
+  offers        Offer[]
+  watchlist     Watchlist[]
+  savedSearches SavedSearch[]
+  inspections   Inspection[]  @relation("InspectionCustomer")
+  inspectedJobs Inspection[]  @relation("InspectionInspector")
+  ordersAsBuyer  Order[]      @relation("OrderBuyer")
+  ordersAsSeller Order[]      @relation("OrderSeller")
+  messages      Message[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+
+  leadingAuctions Auction[] @relation("AuctionLeader")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([role, tier])
+  @@index([city])
+}
+
+/* -------------------------------------------------------------------------- */
+/* Listings                                                                   */
+/* -------------------------------------------------------------------------- */
+
+model Listing {
+  id       String        @id @default(cuid())
+  slug     String        @unique
+  sellerId String
+  seller   User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  type     ListingType
+  status   ListingStatus @default(DRAFT)
+
+  title       String
+  description String @db.Text
+
+  // identity
+  make             String
+  model            String
+  variant          String
+  year             Int
+  registrationCity String
+  registrationYear Int?
+  chassisNumber    String?
+
+  // condition
+  mileageKm    Int
+  transmission Transmission
+  fuelType     FuelType
+  bodyType     BodyType
+  assembly     Assembly
+  engineCc     Int
+  colour       String
+  ownersCount  Int          @default(1)
+
+  // disclosure
+  hasAccidentHistory      Boolean @default(false)
+  accidentNotes           String? @db.Text
+  hasFloodDamage          Boolean @default(false)
+  serviceHistoryAvailable Boolean @default(false)
+  auctionSheetGrade       String?
+
+  // classified pricing — PKR, integer
+  askingPrice  Int?
+  isNegotiable Boolean @default(true)
+
+  features String[]
+
+  images     ListingImage[]
+  auction    Auction?
+  inspection Inspection?
+  offers     Offer[]
+  watchers   Watchlist[]
+  order      Order?
+  conversations Conversation[]
+
+  viewCount  Int     @default(0)
+  watchCount Int     @default(0)
+  isFeatured Boolean @default(false)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, type, publishedAt])
+  @@index([make, model, year])
+  @@index([registrationCity])
+  @@index([sellerId])
+}
+
+model ListingImage {
+  id        String  @id @default(cuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  url       String
+  alt       String
+  blurhash  String?
+  order     Int     @default(0)
+  isPrimary Boolean @default(false)
+  angle     String?
+
+  @@index([listingId, order])
+}
+
+/* -------------------------------------------------------------------------- */
+/* Auctions                                                                   */
+/* -------------------------------------------------------------------------- */
+
+model Auction {
+  id        String  @id @default(cuid())
+  listingId String  @unique
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  status AuctionStatus @default(SCHEDULED)
+
+  startingPrice Int
+
+  /// HIDDEN. Never serialised to a client — the repository exposes only a
+  /// derived reserveStatus of NO_RESERVE | MET | NOT_MET.
+  reservePrice Int?
+
+  currentPrice Int
+
+  leaderId String?
+  leader   User?   @relation("AuctionLeader", fields: [leaderId], references: [id])
+
+  /// SERVER-ONLY. The current leader's proxy ceiling.
+  leaderMaxBid Int?
+
+  bidCount    Int @default(0)
+  bidderCount Int @default(0)
+
+  startsAt DateTime
+  /// Mutated by soft close — a bid in the final 3 minutes pushes this out.
+  endsAt   DateTime
+  /// Immutable, so the UI can show "extended by 12m".
+  originalEndsAt DateTime
+  extensionCount Int      @default(0)
+
+  soldPrice     Int?
+  buyersPremium Int?
+
+  bids Bid[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Drives the close-auctions cron and the "ending soonest" sort.
+  @@index([status, endsAt])
+}
+
+/// Append-only. Rows are never updated except `status`.
+model Bid {
+  id        String  @id @default(cuid())
+  auctionId String
+  auction   Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  bidderId  String
+  bidder    User    @relation(fields: [bidderId], references: [id], onDelete: Cascade)
+
+  /// The visible bid placed.
+  amount Int
+
+  /// SERVER-ONLY. The bidder's proxy ceiling.
+  maxAmount Int
+
+  /// True when the proxy engine generated this row defending an existing max.
+  isAutoBid Boolean   @default(false)
+  status    BidStatus @default(LEADING)
+
+  placedAt DateTime @default(now())
+
+  @@index([auctionId, placedAt])
+  @@index([bidderId, placedAt])
+}
+
+/* -------------------------------------------------------------------------- */
+/* Inspections                                                                */
+/* -------------------------------------------------------------------------- */
+
+model Inspection {
+  id        String  @id @default(cuid())
+  /// Customer-facing, e.g. "PO-INS-2026-48120".
+  reference String  @unique
+  /// Powers the public shareable report URL, no login required.
+  publicToken String @unique @default(cuid())
+
+  listingId String?  @unique
+  listing   Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  customerId String
+  customer   User   @relation("InspectionCustomer", fields: [customerId], references: [id])
+
+  inspectorId String?
+  inspector   User?   @relation("InspectionInspector", fields: [inspectorId], references: [id])
+
+  package InspectionPackage
+  status  InspectionStatus  @default(REQUESTED)
+
+  city       String
+  isDoorstep Boolean @default(true)
+  address    String?
+
+  scheduledAt DateTime?
+  completedAt DateTime?
+
+  /// 0–10, weighted across categories.
+  overallScore      Float?
+  grade             InspectionGrade?
+  checkpointsTotal  Int?
+  checkpointsPassed Int?
+  summary           String?          @db.Text
+
+  price Int
+
+  categories InspectionCategory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, scheduledAt])
+  @@index([customerId])
+}
+
+model InspectionCategory {
+  id           String     @id @default(cuid())
+  inspectionId String
+  inspection   Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
+  name String
+  slug String
+
+  score  Float
+  /// Contribution to the weighted overall score. Sums to 1 across categories.
+  weight Float
+
+  itemsTotal  Int
+  itemsPassed Int
+
+  items InspectionItem[]
+
+  @@index([inspectionId])
+}
+
+model InspectionItem {
+  id         String             @id @default(cuid())
+  categoryId String
+  category   InspectionCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  label    String
+  severity ItemSeverity
+  note     String?      @db.Text
+
+  /// Required when severity is MINOR or worse. Retained for 3 years.
+  photoUrls String[]
+
+  @@index([categoryId])
+}
+
+/* -------------------------------------------------------------------------- */
+/* Supporting                                                                 */
+/* -------------------------------------------------------------------------- */
+
+model Watchlist {
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([userId, listingId])
+  @@index([listingId])
+}
+
+model SavedSearch {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name           String
+  queryJson      Json
+  alertFrequency String @default("DAILY")
+
+  lastRunAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Offer {
+  id        String  @id @default(cuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerId   String
+  buyer     User    @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  amount  Int
+  status  OfferStatus @default(PENDING)
+  message String?     @db.Text
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([listingId, status])
+  @@index([buyerId])
+}
+
+model Order {
+  id        String  @id @default(cuid())
+  listingId String  @unique
+  listing   Listing @relation(fields: [listingId], references: [id])
+
+  buyerId  String
+  buyer    User   @relation("OrderBuyer", fields: [buyerId], references: [id])
+  sellerId String
+  seller   User   @relation("OrderSeller", fields: [sellerId], references: [id])
+
+  hammerPrice   Int
+  buyersPremium Int
+  total         Int
+
+  status       OrderStatus @default(PENDING_DEPOSIT)
+  depositPaidAt DateTime?
+  completedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+model Conversation {
+  id        String  @id @default(cuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  participantIds String[]
+
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([listingId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  /// Phone numbers are stripped before persisting so contact stays on-platform.
+  body String @db.Text
+
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type        String
+  payloadJson Json
+
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id      String @id @default(cuid())
+  actorId String
+  actor   User   @relation(fields: [actorId], references: [id])
+
+  action   String
+  entity   String
+  entityId String
+
+  beforeJson Json?
+  afterJson  Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId, createdAt])
+}

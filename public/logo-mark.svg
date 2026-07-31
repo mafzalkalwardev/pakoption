@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="PakOption">
+  <title>PakOption</title>
+  <defs>
+    <linearGradient id="poArc" x1="8" y1="40" x2="40" y2="8" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0B6B45"/>
+      <stop offset="45%" stop-color="#12B76A"/>
+      <stop offset="100%" stop-color="#5FE8AC"/>
+    </linearGradient>
+    <linearGradient id="poGold" x1="25" y1="21" x2="37" y2="13" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F5B301"/>
+      <stop offset="100%" stop-color="#FFD666"/>
+    </linearGradient>
+  </defs>
+
+  <!-- gauge arc: 270deg sweep, gap at the bottom -->
+  <path d="M10.57 37.43 A19 19 0 1 1 37.43 37.43"
+        fill="none" stroke="url(#poArc)" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- gauge ticks -->
+  <g stroke="#12B76A" stroke-width="2" stroke-linecap="round" opacity=".45">
+    <path d="M13.4 34.6 15.5 32.5"/>
+    <path d="M24 5.6 24 8.6"/>
+    <path d="M34.6 34.6 32.5 32.5"/>
+  </g>
+
+  <!-- needle / gavel handle -->
+  <path d="M24 27 L29.5 19" stroke="#F4F7F5" stroke-width="3.4" stroke-linecap="round"/>
+
+  <!-- gavel head -->
+  <rect x="25" y="14" width="12" height="6" rx="3"
+        fill="url(#poGold)" transform="rotate(34.5 31 17)"/>
+
+  <!-- pivot -->
+  <circle cx="24" cy="27" r="3.6" fill="#F4F7F5"/>
+  <circle cx="24" cy="27" r="1.5" fill="#04140E"/>
+</svg>
