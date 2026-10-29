@@ -1,100 +1,68 @@
 <div align="center">
-  <img src="public/logo.svg" alt="PakOption" width="280" />
-  <h3>Every car verified. Every price in the open.</h3>
-  <p>Pakistan's inspection-backed car auction and classifieds marketplace.</p>
+
+# PakOption
+
+<img src="https://readme-typing-svg.demolab.com?font=Inter&weight=700&size=28&duration=2800&pause=700&color=059669&center=true&vCenter=true&width=900&lines=Pakistan+Car+Auction+Marketplace;Inspection-Backed+Listings;Next.js+15+%2B+Tailwind+v4;Modern+marketplace+UX" alt="Typing SVG" />
+
+<p>
+  <img src="https://komarev.com/ghpvc/?username=mafzalkalwardev&label=Project%20Views&color=059669&style=for-the-badge" alt="Project views" />
+  <img src="https://img.shields.io/github/stars/mafzalkalwardev/pakoption?style=for-the-badge&color=22c55e" alt="GitHub stars" />
+  <img src="https://img.shields.io/github/forks/mafzalkalwardev/pakoption?style=for-the-badge&color=f59e0b" alt="GitHub forks" />
+  <img src="https://img.shields.io/github/license/mafzalkalwardev/pakoption?style=for-the-badge&color=64748b" alt="License" />
+</p>
+
+<p>
+  <img src="https://skillicons.dev/icons?i=ts,nextjs,react,tailwind" alt="Skill icons" />
+</p>
+
+<p>
+  <strong>Pakistan's inspection-backed car auction marketplace — Next.js 15, Tailwind v4, and modern marketplace UX.</strong>
+</p>
+
 </div>
 
 ---
 
-## What this is
+## Trophy Cards
 
-PakOption is three products in one platform:
-
-1. **Classifieds** — peer-to-peer car listings (the OLX / PakWheels model)
-2. **Timed auctions** — proxy bidding, hidden reserve, three-minute anti-snipe soft close (the Cars & Bids / Bring a Trailer model)
-3. **Inspection services** — a first-party 212-point vehicle inspection, sold standalone *and* built into the listing flow
-
-**The thesis:** used-car marketplaces in Pakistan fail on *trust*, not supply. PakWheels and OLX both sell a 200+ point inspection — but as a separate product booked *after* listing, so most listings stay unverified. Making the inspection native to the listing flow is the wedge; the auction engine on top of it solves price discovery.
+<div align="center">
+  <img src="https://github-profile-trophy.vercel.app/?username=mafzalkalwardev&theme=algolia&no-frame=true&no-bg=true&margin-w=12&margin-h=12&column=4" alt="GitHub trophy cards" />
+</div>
 
 ---
 
-## Quickstart
+## Stats Cards
 
-```bash
-npm install
-npm run dev          # http://localhost:3000
-```
-
-Or run the whole setup with one command:
-
-```powershell
-.\scripts\setup.ps1        # Windows
-bash scripts/setup.sh      # macOS / Linux
-```
-
-**No database required.** With `DATABASE_URL` unset, the app runs on a deterministic in-memory seed dataset — 36 listings, live auctions with running countdowns, full inspection reports. This is deliberate: it means the first Vercel deploy works with zero configuration.
-
-### Requirements
-Node 20+ (Next.js 15 / React 19).
+<div align="center">
+  <img height="165" src="https://github-readme-stats-sigma-five.vercel.app/api?username=mafzalkalwardev&show_icons=true&theme=tokyonight&hide_border=true&rank_icon=github" alt="GitHub stats" />
+  <img height="165" src="https://github-readme-stats-sigma-five.vercel.app/api/top-langs/?username=mafzalkalwardev&layout=compact&theme=tokyonight&hide_border=true" alt="Top languages" />
+</div>
 
 ---
 
-## Ship it
+## Activity Graph
 
-```powershell
-.\scripts\deploy.ps1        # Windows
-bash scripts/deploy.sh      # macOS / Linux
-```
-
-The script checks your tooling, initialises git, creates the GitHub repo via `gh repo create`, pushes, and runs `vercel --prod`.
-
-**Prerequisites:** [GitHub CLI](https://cli.github.com) (`gh auth login`) and [Vercel CLI](https://vercel.com/cli) (`vercel login`).
-
-Options:
-
-```powershell
-.\scripts\deploy.ps1 -RepoName pakoption -Private
-.\scripts\deploy.ps1 -SkipVercel
-```
-
-```bash
-REPO_NAME=pakoption VISIBILITY=--private bash scripts/deploy.sh
-```
-
-Prefer clicking? Push to GitHub yourself and import at [vercel.com/new](https://vercel.com/new) — Next.js is auto-detected and no env vars are required for the demo build.
+<div align="center">
+  <img src="https://github-readme-activity-graph.vercel.app/graph?username=mafzalkalwardev&theme=react-dark&hide_border=true&area=true" alt="GitHub activity graph" />
+</div>
 
 ---
 
-## Stack
+## Contribution Snake
 
-| Layer | Choice | Why |
-|---|---|---|
-| Framework | Next.js 15 (App Router, React 19) | RSC, server actions, native Vercel deploy |
-| Styling | Tailwind CSS v4 | CSS-first `@theme`, no config file, faster cold builds |
-| Components | shadcn/Radix pattern, source-owned | Full control, Radix accessibility |
-| Motion | Framer Motion + GSAP/ScrollTrigger | Framer for enter/exit/layout; GSAP for pinned scroll timelines and counters |
-| Data | Prisma 6 + PostgreSQL (Supabase) | Relational integrity is non-negotiable for bid ordering |
-| Validation | Zod | One schema for form, server action and route handler |
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mafzalkalwardev/google-voice-dispatch-agent/output/github-contribution-grid-snake-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/mafzalkalwardev/google-voice-dispatch-agent/output/github-contribution-grid-snake.svg">
+    <img alt="Contribution snake" src="https://raw.githubusercontent.com/mafzalkalwardev/google-voice-dispatch-agent/output/github-contribution-grid-snake.svg">
+  </picture>
+</div>
 
 ---
 
-## Routes
+## SEO Keywords
 
-| Route | What it does |
-|---|---|
-| `/` | GSAP scroll hero, live ticker, featured lots, inspection showcase |
-| `/auctions` | Faceted grid — live / upcoming / results |
-| `/auctions/[slug]` | Gallery, specs, inspection report, bid panel, bid history |
-| `/buy` · `/buy/[slug]` | Classifieds with offers and a financing calculator |
-| `/sell` · `/sell/new` | Seller landing and the 7-step listing wizard |
-| `/inspection` | Packages, 9 categories, coverage, sample report, FAQ |
-| `/inspection/book` | 4-step booking flow |
-| `/inspection/report/[token]` | Public shareable report, no login |
-| `/compare` | Up to 4 cars side by side with 5-year running costs |
-| `/dashboard/*` | Bids, listings, watchlist, inspections, searches, messages, settings |
-| `/how-it-works` · `/pricing` | Proxy bidding explained, full fee table |
-| `/login` · `/register` · `/legal/*` · `/blog` | Auth, legal, content |
-| `/api/*` | Auctions, bids, stats, suggest, cron |
+`car auction` `Pakistan marketplace` `Next.js` `Tailwind`
 
 ---
 
