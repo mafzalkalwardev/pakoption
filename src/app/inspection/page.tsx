@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withCanonical } from "@/lib/seo";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -32,11 +33,11 @@ import {
 import { formatPKR } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withCanonical("/inspection", {
   title: "Car inspection service",
   description:
-    "212-point third-party car inspection in seven Pakistani cities. Doorstep or centre, digital report in 45–60 minutes, photographic evidence on every fault.",
-};
+    "Inspection packages of 120, 212, or 240 checkpoints. Booking lists seven cities and offers doorstep or a service centre.",
+});
 
 const FAQS = [
   {

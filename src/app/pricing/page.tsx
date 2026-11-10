@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withCanonical } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowRight, Check, Info } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -8,11 +9,11 @@ import { Button } from "@/components/ui/button";
 import { FEES, INSPECTION_PACKAGES } from "@/lib/constants";
 import { formatPKR, formatPKRShort } from "@/lib/format";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withCanonical("/pricing", {
   title: "Fees & pricing",
   description:
-    "Every PakOption fee in one table: listing fee, success fee, buyer's premium, inspection packages and featured placement.",
-};
+    "Fees configured in PakOption: listing fee, success fee, buyer's premium, inspection packages, and featured placement.",
+});
 
 export default function PricingPage() {
   return (

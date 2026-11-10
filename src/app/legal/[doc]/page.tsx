@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
+import { withCanonical } from "@/lib/seo";
 
 const DOCS: Record<
   string,
@@ -181,7 +182,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { doc } = await params;
   const entry = DOCS[doc];
-  return { title: entry?.title ?? "Legal" };
+  return withCanonical(`/legal/${doc}`, {
+    title: entry?.title ?? "Legal",
+    description: entry
+      ? `${entry.title} for PakOption. This text ships with the app and has not been reviewed as legal advice.`
+      : "Legal document.",
+  });
 }
 
 export default async function LegalPage({

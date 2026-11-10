@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withCanonical } from "@/lib/seo";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { ListingCard } from "@/components/auction/listing-card";
@@ -8,11 +9,11 @@ import { ListingGridSkeleton } from "@/components/ui/skeleton";
 import { getClassifieds } from "@/lib/db/repository";
 import { parseQuery, type SearchParams } from "@/lib/query";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withCanonical("/buy", {
   title: "Buy a used car",
   description:
-    "Browse fixed-price used cars across Pakistan. Filter by make, city, budget and inspection grade, and make an offer directly.",
-};
+    "Fixed-price classifieds with the same filters as auctions, plus an offer form on each listing.",
+});
 
 export const revalidate = 300;
 

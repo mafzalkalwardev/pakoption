@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withCanonical } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowRight, Lock, Mail, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
@@ -6,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/primitives";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withCanonical("/login", {
   title: "Sign in",
-  description: "Sign in to bid, sell and manage your PakOption inspections.",
-};
+  description: "Sign-in screen. An auth provider is not connected in the default configuration.",
+  robots: { index: false, follow: false },
+});
 
 export default function LoginPage() {
   return (

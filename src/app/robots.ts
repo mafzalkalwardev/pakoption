@@ -1,18 +1,19 @@
 import type { MetadataRoute } from "next";
-import { SITE } from "@/lib/constants";
+import { AI_CRAWLERS, DISALLOWED_PATHS, getSiteUrl } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
-  const base = SITE.url.replace(/\/$/, "");
+  const base = getSiteUrl();
+  const shared = {
+    allow: "/",
+    disallow: [...DISALLOWED_PATHS],
+  };
+
   return {
     rules: [
-      {
-        userAgent: "*",
-        allow: "/",
-        // Shared inspection reports are unlisted by design, and dashboards and
-        // API routes have nothing useful for a crawler.
-        disallow: ["/dashboard/", "/api/", "/inspection/report/"],
-      },
+      { userAgent: "*", ...shared },
+      { userAgent: [...AI_CRAWLERS], ...shared },
     ],
     sitemap: `${base}/sitemap.xml`,
+    host: base,
   };
 }

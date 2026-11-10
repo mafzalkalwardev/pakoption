@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withCanonical } from "@/lib/seo";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,11 +12,11 @@ import { formatMileage, formatPKR, label } from "@/lib/format";
 import type { SearchParams } from "@/lib/query";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withCanonical("/compare", {
   title: "Compare cars",
   description:
-    "Compare up to four cars side by side — specification, price, inspection score and estimated five-year running cost.",
-};
+    "Compare up to four cars on specification, price, and inspection score, plus a running-cost estimate from the page's own formula.",
+});
 
 /** Very rough five-year running cost model for Pakistan. Illustrative only. */
 function runningCost(engineCc: number, fuel: string, mileageKm: number) {

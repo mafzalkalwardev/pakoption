@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withCanonical } from "@/lib/seo";
 import Link from "next/link";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -10,11 +11,11 @@ import { getListings } from "@/lib/db/repository";
 import { parseQuery, type SearchParams } from "@/lib/query";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withCanonical("/auctions", {
   title: "Live car auctions",
   description:
-    "Bid on inspection-backed cars across Pakistan. Proxy bidding, hidden reserves and a three-minute soft close on every lot.",
-};
+    "Timed car auctions with filters, proxy bidding, a hidden reserve, and a three-minute soft close. Demo listings load when no database is connected.",
+});
 
 export const revalidate = 30;
 

@@ -1,38 +1,27 @@
-import { Hero } from "@/components/home/hero";
-import {
-  CategoryGrid,
-  FeaturedAuctions,
-  FinalCTA,
-  HowItWorks,
-  InspectionShowcase,
-  LiveTicker,
-  Testimonials,
-} from "@/components/home/sections";
-import {
-  getLiveAuctions,
-  getStats,
-  getTestimonials,
-} from "@/lib/db/repository";
+import type { Metadata } from "next";
+import { LandingPage } from "@/components/home/landing";
+import { JsonLd } from "@/components/seo/json-ld";
+import { HOME_DESCRIPTION, HOME_TITLE, homeJsonLd, withCanonical } from "@/lib/seo";
 
-export const revalidate = 60;
+export const metadata: Metadata = withCanonical("/", {
+  title: { absolute: HOME_TITLE },
+  description: HOME_DESCRIPTION,
+  openGraph: {
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+  },
+});
 
-export default async function HomePage() {
-  const [stats, live, testimonials] = await Promise.all([
-    getStats(),
-    getLiveAuctions(12),
-    getTestimonials(),
-  ]);
-
+export default function HomePage() {
   return (
     <>
-      <Hero stats={stats} />
-      <LiveTicker listings={live.slice(0, 10)} />
-      <FeaturedAuctions listings={live.slice(0, 6)} />
-      <CategoryGrid />
-      <HowItWorks />
-      <InspectionShowcase />
-      <Testimonials items={testimonials} />
-      <FinalCTA />
+      <JsonLd json={homeJsonLd()} />
+      <LandingPage />
     </>
   );
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withCanonical } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
@@ -6,17 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/primitives";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withCanonical("/register", {
   title: "Create an account",
   description:
-    "Create a PakOption account to bid on inspection-backed cars, sell your own, and book inspections.",
-};
+    "Registration screen for PakOption. An auth provider is not connected in the default configuration.",
+  robots: { index: false, follow: false },
+});
 
 const PERKS = [
-  "Bid on 1,200+ live auctions",
-  "Free listing when you book an inspection",
-  "Outbid and ending-soon alerts",
-  "Shareable inspection reports",
+  "Auction board with proxy bidding and a three-minute soft close",
+  "Listing fee set to zero on review when you book an inspection",
+  "Inspection reports with a shareable link",
+  "Compare up to four cars",
 ];
 
 export default function RegisterPage() {

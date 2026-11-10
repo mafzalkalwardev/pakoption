@@ -33,6 +33,7 @@ import {
   getSimilarListings,
 } from "@/lib/db/repository";
 import { formatCompact, formatDatePK, label } from "@/lib/format";
+import { withCanonical } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -45,15 +46,16 @@ export async function generateMetadata({
   const listing = await getListingBySlug(slug);
   if (!listing) return { title: "Lot not found" };
 
-  return {
+  const description = listing.description.slice(0, 155);
+  return withCanonical(`/auctions/${slug}`, {
     title: listing.title,
-    description: listing.description.slice(0, 155),
+    description,
     openGraph: {
       title: listing.title,
-      description: listing.description.slice(0, 155),
+      description,
       images: listing.images[0] ? [listing.images[0].url] : undefined,
     },
-  };
+  });
 }
 
 export default async function AuctionDetailPage({

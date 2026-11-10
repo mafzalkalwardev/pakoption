@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronRight,
   Gavel,
@@ -17,13 +16,11 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
-import { useReducedMotion } from "@/components/motion/motion-provider";
 import { NAV_LINKS, POPULAR_SEARCHES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const pathname = usePathname();
-  const reduced = useReducedMotion();
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -108,10 +105,7 @@ export function Navbar() {
                   >
                     {link.label}
                     {active && (
-                      <motion.span
-                        layoutId={reduced ? undefined : "nav-underline"}
-                        className="absolute inset-x-3.5 -bottom-0.5 h-0.5 rounded-full bg-brand-400"
-                      />
+                      <span className="absolute inset-x-3.5 -bottom-0.5 h-0.5 rounded-full bg-brand-400" />
                     )}
                   </Link>
                 </li>
@@ -123,12 +117,11 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="hidden items-center gap-2 rounded-md border border-line bg-surface/70 py-2 pl-3 pr-2 text-sm text-muted-2 transition-colors hover:border-line-strong hover:text-muted md:flex"
-              aria-label="Search cars"
+              className="hidden items-center gap-2 rounded-md border border-line bg-surface/70 py-2 pl-3 pr-2 text-sm text-muted transition-colors hover:border-line-strong hover:text-ivory md:flex"
             >
               <Search className="size-4" aria-hidden />
-              <span className="w-32 text-left">Search cars…</span>
-              <kbd className="rounded border border-line bg-ink-2 px-1.5 py-0.5 font-mono text-[10px] text-muted-2">
+              <span className="w-32 text-left">Search cars</span>
+              <kbd className="rounded border border-line bg-ink-2 px-1.5 py-0.5 font-mono text-[10px] text-muted">
                 ⌘K
               </kbd>
             </button>
@@ -178,27 +171,20 @@ export function Navbar() {
       </header>
 
       {/* ---------------- Mobile drawer ---------------- */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-[60] bg-ink/85 backdrop-blur-sm lg:hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.div
-              className="fixed inset-y-0 right-0 z-[61] flex w-[min(22rem,88vw)] flex-col border-l border-line bg-surface lg:hidden"
-              initial={reduced ? false : { x: "100%" }}
-              animate={{ x: 0 }}
-              exit={reduced ? undefined : { x: "100%" }}
-              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              role="dialog"
-              aria-modal="true"
-              aria-label="Menu"
-            >
+      {mobileOpen && (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-[60] bg-ink/85 backdrop-blur-sm animate-fade-in lg:hidden"
+            aria-label="Close menu"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div
+            className="fixed inset-y-0 right-0 z-[61] flex w-[min(22rem,88vw)] animate-slide-in-right flex-col border-l border-line bg-surface lg:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
+          >
               <div className="flex h-16 items-center justify-between border-b border-line px-5">
                 <Logo markClassName="size-8" />
                 <Button
@@ -279,33 +265,25 @@ export function Navbar() {
                   <Link href="/login">Sign in</Link>
                 </Button>
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+          </div>
+        </>
+      )}
 
       {/* ---------------- Search palette ---------------- */}
-      <AnimatePresence>
-        {searchOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-[70] bg-ink/85 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              onClick={() => setSearchOpen(false)}
-            />
-            <motion.div
-              className="fixed left-1/2 top-[12vh] z-[71] w-[min(40rem,92vw)] -translate-x-1/2"
-              initial={reduced ? false : { opacity: 0, y: -12, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={reduced ? undefined : { opacity: 0, y: -8, scale: 0.99 }}
-              transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-              role="dialog"
-              aria-modal="true"
-              aria-label="Search"
-            >
+      {searchOpen && (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-[70] animate-fade-in bg-ink/85 backdrop-blur-sm"
+            aria-label="Close search"
+            onClick={() => setSearchOpen(false)}
+          />
+          <div
+            className="fixed left-1/2 top-[12vh] z-[71] w-[min(40rem,92vw)] -translate-x-1/2 animate-slide-up"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Search"
+          >
               <form
                 action="/auctions"
                 className="edge-light overflow-hidden rounded-xl border border-line-strong bg-surface shadow-lift"
@@ -339,10 +317,9 @@ export function Navbar() {
                   </div>
                 </div>
               </form>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+          </div>
+        </>
+      )}
     </>
   );
 }

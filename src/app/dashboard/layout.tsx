@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Gavel,
@@ -10,6 +11,10 @@ import {
   Tag,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 const NAV = [
   { href: "/dashboard", label: "Overview", Icon: LayoutDashboard },

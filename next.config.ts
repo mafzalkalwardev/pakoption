@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Homepage canonical is https://pakoption.induswebagency.com/ (trailing slash).
+  trailingSlash: true,
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [

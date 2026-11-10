@@ -38,22 +38,13 @@ import {
   FUEL_TYPES,
   FEES,
   INSPECTION_PACKAGES,
+  LISTING_WIZARD_STEPS as STEPS,
   MAKES,
   MODELS_BY_MAKE,
   TRANSMISSIONS,
 } from "@/lib/constants";
 import { formatPKR, formatPKRShort } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const STEPS = [
-  "Vehicle",
-  "Condition",
-  "Photos",
-  "Disclosure",
-  "Format",
-  "Inspection",
-  "Review",
-] as const;
 
 const GUIDED_ANGLES = [
   "Front 3/4",
@@ -915,8 +906,9 @@ export function SellWizard() {
                       Add an inspection?
                     </h2>
                     <p className="mt-2 text-[14px] text-muted">
-                      Certified lots sell through about 20 percentage points more
-                      often, and we waive the listing fee when you book one.
+                      Booking an inspection sets the auction listing fee to zero
+                      on the review step. A report graded A or B within 30 days
+                      shows the Certified badge on the listing.
                     </p>
                   </div>
 

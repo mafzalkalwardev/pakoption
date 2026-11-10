@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
+import { withCanonical } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowRight, Clock } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { StaggerGroup, StaggerItem } from "@/components/motion/reveal";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withCanonical("/blog", {
   title: "Blog",
   description:
-    "Guides on buying, selling and inspecting cars in Pakistan — pricing, paperwork, imports and auction strategy.",
-};
+    "Blog index. Posts listed here are stubs and are not published articles.",
+});
 
 const POSTS = [
   {
