@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import { withCanonical } from "@/lib/seo";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { BookingFlow } from "@/components/inspection/booking-flow";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withCanonical("/inspection/book", {
   title: "Book a car inspection",
   description:
-    "Book a 212-point car inspection at your doorstep or at a PakOption service centre. Report in 45–60 minutes.",
-};
+    "Four-step booking flow: package, city, doorstep or service centre, schedule, and confirm.",
+});
 
 export default function BookInspectionPage() {
   return (

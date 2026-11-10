@@ -1,0 +1,11 @@
+[Unit]
+Description=Close PakOption auctions every minute
+
+[Timer]
+OnCalendar=*:0/1
+AccuracySec=5s
+Persistent=true
+Unit=pakoption-cron.service
+
+[Install]
+WantedBy=timers.target

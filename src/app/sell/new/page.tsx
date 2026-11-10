@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import { withCanonical } from "@/lib/seo";
 import { PageHeader } from "@/components/layout/page-header";
 import { SellWizard } from "@/components/sell/wizard";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withCanonical("/sell/new", {
   title: "Create a listing",
   description:
-    "List your car by auction or classified on PakOption in about six minutes.",
-};
+    "Seven-step listing wizard: vehicle, condition, photos, disclosure, format, inspection, and review.",
+});
 
 export default function NewListingPage() {
   return (

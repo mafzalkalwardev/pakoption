@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/primitives";
 import { getListingBySlug, getSimilarListings } from "@/lib/db/repository";
 import { formatCompact, formatDatePK, label } from "@/lib/format";
+import { withCanonical } from "@/lib/seo";
 
 export const revalidate = 300;
 
@@ -38,13 +39,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const listing = await getListingBySlug(slug);
   if (!listing) return { title: "Listing not found" };
-  return {
+  return withCanonical(`/buy/${slug}`, {
     title: listing.title,
     description: listing.description.slice(0, 155),
     openGraph: {
       images: listing.images[0] ? [listing.images[0].url] : undefined,
     },
-  };
+  });
 }
 
 export default async function ClassifiedDetailPage({
@@ -217,6 +218,7 @@ export default async function ClassifiedDetailPage({
 
         <div className="lg:sticky lg:top-24">
           <OfferPanel
+            listingId={listing.id}
             askingPrice={listing.askingPrice ?? 0}
             negotiable={listing.isNegotiable}
             city={listing.registrationCity}

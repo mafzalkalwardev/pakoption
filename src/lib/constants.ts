@@ -5,15 +5,33 @@ import type {
   Transmission,
 } from "@/types";
 
+function resolveSiteUrl(): string {
+  const raw =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    "https://pakoption.induswebagency.com";
+  return raw.replace(/\/+$/, "");
+}
+
 export const SITE = {
   name: "PakOption",
-  tagline: "Every car verified. Every price in the open.",
+  tagline: "Inspection-backed car auctions for Pakistan.",
   description:
-    "Pakistan's inspection-backed car auction marketplace. Bid on 200-point inspected cars, sell by auction or classified, and book a doorstep inspection in six cities.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+    "PakOption is an inspection-backed car auction and classifieds marketplace for Pakistan, made by INDUS Web Agency. Browse proxy-bid auctions, classifieds, and inspection reports.",
+  url: resolveSiteUrl(),
   locale: "en_PK",
   timezone: "Asia/Karachi",
 } as const;
+
+/** Labels for the seven-step sell wizard. Keep in lockstep with the wizard UI. */
+export const LISTING_WIZARD_STEPS = [
+  "Vehicle",
+  "Condition",
+  "Photos",
+  "Disclosure",
+  "Format",
+  "Inspection",
+  "Review",
+] as const;
 
 export const CITIES = [
   "Karachi",
@@ -407,6 +425,7 @@ export const FOOTER_SECTIONS = [
     links: [
       { href: "/how-it-works", label: "How it works" },
       { href: "/blog", label: "Blog" },
+      { href: "/llms.txt", label: "llms.txt" },
       { href: "/legal/terms", label: "Terms" },
       { href: "/legal/privacy", label: "Privacy" },
       { href: "/legal/auction-rules", label: "Auction rules" },

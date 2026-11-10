@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getSession } from "@/lib/auth/session";
 import {
   Gavel,
   Heart,
@@ -11,6 +14,10 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
 const NAV = [
   { href: "/dashboard", label: "Overview", Icon: LayoutDashboard },
   { href: "/dashboard/bids", label: "My bids", Icon: Gavel },
@@ -22,17 +29,19 @@ const NAV = [
   { href: "/dashboard/settings", label: "Settings", Icon: Settings },
 ];
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getSession();
+  if (!session) redirect("/login");
   return (
     <>
       <PageHeader
         eyebrow="Dashboard"
-        title="Welcome back, Afzal"
-        description="Everything you're bidding on, selling, watching and waiting for — in one place."
+        title={`Welcome back, ${session.name}`}
+        description="Your bids, listings, watchlist and inspections."
       />
 
       <div className="container-page py-8 md:py-10">

@@ -10,13 +10,49 @@
  */
 
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../src/lib/auth/password";
 import { LISTINGS, SELLERS, BIDS_BY_AUCTION, RESERVES } from "../src/lib/db/seed-data";
 
 const prisma = new PrismaClient();
 
+async function upsertAdmin() {
+  const email = (process.env.ADMIN_EMAIL || "admin@pakoption.local").toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password) {
+    console.log("ADMIN_PASSWORD is unset — admin user was not created.");
+    return;
+  }
+  await prisma.user.upsert({
+    where: { email },
+    update: { role: "ADMIN", tier: "CNIC", passwordHash: await hashPassword(password), name: "PakOption Admin" },
+    create: {
+      email,
+      name: "PakOption Admin",
+      handle: "admin_pakoption",
+      role: "ADMIN",
+      tier: "CNIC",
+      passwordHash: await hashPassword(password),
+    },
+  });
+  console.log(`Admin ready: ${email}`);
+}
+
 async function main() {
+  if (process.env.SEED_DEMO !== "1") {
+    await upsertAdmin();
+    console.log("Demo listings skipped. Set SEED_DEMO=1 to load the sample dataset.");
+    return;
+  }
+
   console.log("Clearing existing data…");
   // Order matters — children first.
+  await prisma.session.deleteMany();
+  await prisma.auditLog.deleteMany();
+  await prisma.notification.deleteMany();
+  await prisma.message.deleteMany();
+  await prisma.conversation.deleteMany();
+  await prisma.savedSearch.deleteMany();
+  await prisma.order.deleteMany();
   await prisma.inspectionItem.deleteMany();
   await prisma.inspectionCategory.deleteMany();
   await prisma.inspection.deleteMany();
@@ -208,6 +244,7 @@ async function main() {
     }
   }
 
+  await upsertAdmin();
   console.log("Done.");
 }
 

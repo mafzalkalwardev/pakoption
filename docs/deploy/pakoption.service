@@ -1,0 +1,20 @@
+[Unit]
+Description=PakOption (Next.js)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/pakoption
+Environment=NODE_ENV=production
+EnvironmentFile=/etc/pakoption.env
+ExecStart=/usr/bin/npm run start -- -H 127.0.0.1 -p 3000
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

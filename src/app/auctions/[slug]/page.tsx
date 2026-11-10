@@ -33,6 +33,7 @@ import {
   getSimilarListings,
 } from "@/lib/db/repository";
 import { formatCompact, formatDatePK, label } from "@/lib/format";
+import { withCanonical } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -45,15 +46,16 @@ export async function generateMetadata({
   const listing = await getListingBySlug(slug);
   if (!listing) return { title: "Lot not found" };
 
-  return {
+  const description = listing.description.slice(0, 155);
+  return withCanonical(`/auctions/${slug}`, {
     title: listing.title,
-    description: listing.description.slice(0, 155),
+    description,
     openGraph: {
       title: listing.title,
-      description: listing.description.slice(0, 155),
+      description,
       images: listing.images[0] ? [listing.images[0].url] : undefined,
     },
-  };
+  });
 }
 
 export default async function AuctionDetailPage({
@@ -275,7 +277,7 @@ export default async function AuctionDetailPage({
 
         {/* sticky bid panel */}
         <div className="lg:sticky lg:top-24">
-          <BidPanel auction={listing.auction} />
+          <BidPanel auction={listing.auction} listingId={listing.id} />
 
           <div className="mt-4 flex gap-2 lg:hidden">
             <Button variant="secondary" size="sm" className="flex-1">

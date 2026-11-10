@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withCanonical } from "@/lib/seo";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -20,11 +21,11 @@ import { INCREMENT_TABLE } from "@/lib/auction/engine";
 import { FEES } from "@/lib/constants";
 import { formatPKR, formatPKRShort } from "@/lib/format";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withCanonical("/how-it-works", {
   title: "How it works",
   description:
-    "How PakOption auctions work: proxy bidding, hidden reserves, three-minute soft close, and what happens when a reserve isn't met.",
-};
+    "How PakOption auctions work: proxy bidding, hidden reserves, a three-minute soft close, and the best-offer window when a reserve is not met.",
+});
 
 const BUYER_STEPS = [
   {

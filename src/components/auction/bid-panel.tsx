@@ -37,7 +37,6 @@ import {
   getMinimumBid,
   getQuickBids,
   requiredTierForBid,
-  simulateBid,
   type AuctionState,
 } from "@/lib/auction/engine";
 import { formatPKR, formatPKRShort } from "@/lib/format";
@@ -51,9 +50,11 @@ import type { AuctionPublic } from "@/types";
  */
 export function BidPanel({
   auction,
+  listingId,
   className,
 }: {
   auction: AuctionPublic;
+  listingId: string;
   className?: string;
 }) {
   const time = useCountdown(auction.endsAt);
@@ -107,52 +108,43 @@ export function BidPanel({
 
   async function submit() {
     setSubmitting(true);
-
-    // Optimistic: run the engine locally first.
-    const result = simulateBid(engineState, "me", amount);
-
-    // Stand-in for the `placeBid` server action. See docs/API.md §"placeBid".
-    await new Promise((r) => setTimeout(r, 650));
-
+    const res = await fetch("/api/bids", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ listingId, maxAmount: amount }),
+    });
+    const body = (await res.json()) as {
+      outcome?: string;
+      currentPrice?: number;
+      bidCount?: number;
+      endsAt?: string;
+      error?: { message: string };
+    };
     setSubmitting(false);
     setConfirmOpen(false);
-
-    if (!result.accepted) {
-      toast.error(result.message);
+    if (!res.ok) {
+      toast.error(body.error?.message ?? "Bid was not accepted.");
+      if (res.status === 401) window.location.href = "/login";
       return;
     }
 
+    const leading = body.outcome === "LEADING";
+    const price = body.currentPrice ?? amount;
     setState((s) => ({
       ...s,
-      currentPrice: result.currentPrice,
-      bidCount: result.bidCount,
-      bidderCount: s.bidderCount + 1,
-      reserveStatus:
-        s.reserveStatus === "NO_RESERVE"
-          ? "NO_RESERVE"
-          : result.currentPrice >= s.currentPrice * 1.02
-            ? "MET"
-            : s.reserveStatus,
-      // Soft close: a bid inside the final 3 minutes pushes the clock out.
-      endsAt:
-        time.isExtendable
-          ? new Date(Date.now() + 3 * 60_000).toISOString()
-          : s.endsAt,
-      extensionCount: time.isExtendable
-        ? s.extensionCount + 1
-        : s.extensionCount,
+      currentPrice: price,
+      bidCount: body.bidCount ?? s.bidCount + 1,
+      endsAt: body.endsAt ?? s.endsAt,
     }));
-
-    setIsLeading(result.isLeading);
+    setIsLeading(leading);
     setRaw("");
-
-    if (result.isLeading) {
+    if (leading) {
       toast.success("You are the highest bidder", {
-        description: `Leading at ${formatPKR(result.currentPrice)}. We'll bid up to your maximum automatically.`,
+        description: `Leading at ${formatPKR(price)}. The engine bids only what it needs, up to your maximum.`,
       });
     } else {
-      toast.warning("You were outbid immediately", {
-        description: `Another bidder's maximum is higher. The price moved to ${formatPKR(result.currentPrice)}.`,
+      toast.warning("You were outbid", {
+        description: `The price moved to ${formatPKR(price)}.`,
       });
     }
   }

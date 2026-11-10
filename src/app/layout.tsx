@@ -6,6 +6,8 @@ import { Footer } from "@/components/layout/footer";
 import { MotionProvider } from "@/components/motion/motion-provider";
 import { TooltipProvider } from "@/components/ui/primitives";
 import { SITE } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/json-ld";
+import { HOME_TITLE, PUBLISHER, siteJsonLd } from "@/lib/seo";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,15 +20,19 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
+  // The homepage does not use monospace. Skip the preload so it does not
+  // compete with the sans file on the critical path.
+  preload: false,
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name} — ${SITE.tagline}`,
+    default: HOME_TITLE,
     template: `%s · ${SITE.name}`,
   },
   description: SITE.description,
+  applicationName: SITE.name,
   keywords: [
     "car auction Pakistan",
     "used cars Pakistan",
@@ -34,30 +40,34 @@ export const metadata: Metadata = {
     "sell car Pakistan",
     "buy car online Pakistan",
     "PakOption",
-    "200 point car inspection",
+    "proxy bidding",
     "car bidding Pakistan",
   ],
-  authors: [{ name: SITE.name }],
+  authors: [{ name: PUBLISHER.name, url: PUBLISHER.url }],
+  creator: PUBLISHER.name,
+  publisher: PUBLISHER.name,
   openGraph: {
     type: "website",
     locale: SITE.locale,
-    url: SITE.url,
+    url: `${SITE.url}/`,
     siteName: SITE.name,
-    title: `${SITE.name} — ${SITE.tagline}`,
+    title: HOME_TITLE,
     description: SITE.description,
-    images: [{ url: "/og.svg", width: 1200, height: 630, alt: SITE.name }],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE.name} — ${SITE.tagline}`,
+    title: HOME_TITLE,
     description: SITE.description,
-    images: ["/og.svg"],
   },
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    apple: "/favicon.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon", type: "image/png", sizes: "32x32" },
+    ],
+    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
   },
   robots: { index: true, follow: true },
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {
@@ -73,6 +83,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-dvh antialiased">
+        <JsonLd json={siteJsonLd()} />
         <MotionProvider>
           <TooltipProvider delayDuration={200}>
             <Navbar />
