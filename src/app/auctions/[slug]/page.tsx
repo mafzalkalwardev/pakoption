@@ -277,7 +277,7 @@ export default async function AuctionDetailPage({
 
         {/* sticky bid panel */}
         <div className="lg:sticky lg:top-24">
-          <BidPanel auction={listing.auction} />
+          <BidPanel auction={listing.auction} listingId={listing.id} />
 
           <div className="mt-4 flex gap-2 lg:hidden">
             <Button variant="secondary" size="sm" className="flex-1">

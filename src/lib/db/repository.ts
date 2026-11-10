@@ -32,6 +32,13 @@ import type {
   PublicUser,
 } from "@/types";
 import { getAuctionPhase } from "@/lib/auction/engine";
+import * as dbRead from "@/lib/db/prisma-read";
+import { prisma } from "@/lib/db/client";
+import { listingInclude, toCard, toPublicUser } from "@/lib/db/map";
+
+function useDb() {
+  return Boolean(process.env.DATABASE_URL);
+}
 
 export const USING_DATABASE = Boolean(process.env.DATABASE_URL);
 
@@ -127,22 +134,26 @@ function paginate<T>(items: T[], page = 1, perPage = 24): Paginated<T> {
 export async function getListings(
   query: ListingQuery = {},
 ): Promise<Paginated<ListingCard>> {
+  if (useDb()) return dbRead.prismaGetListings(query);
   const filtered = CARDS.filter((c) => matchesQuery(c, query));
   const sorted = sortCards(filtered, query.sort);
   return paginate(sorted, query.page, query.perPage);
 }
 
 export async function getListingBySlug(slug: string): Promise<Listing | null> {
+  if (useDb()) return dbRead.prismaGetListingBySlug(slug);
   return LISTINGS.find((l) => l.slug === slug) ?? null;
 }
 
 export async function getListingById(id: string): Promise<Listing | null> {
+  if (useDb()) return dbRead.prismaGetListingById(id);
   return LISTINGS.find((l) => l.id === id) ?? null;
 }
 
 export async function getListingCardsByIds(
   ids: string[],
 ): Promise<ListingCard[]> {
+  if (useDb()) return dbRead.prismaGetCardsByIds(ids);
   return ids
     .map((id) => CARDS.find((c) => c.id === id))
     .filter((c): c is ListingCard => Boolean(c));
@@ -151,6 +162,7 @@ export async function getListingCardsByIds(
 export async function getListingCardsBySlugs(
   slugs: string[],
 ): Promise<ListingCard[]> {
+  if (useDb()) return dbRead.prismaGetCardsBySlugs(slugs);
   return slugs
     .map((s) => CARDS.find((c) => c.slug === s))
     .filter((c): c is ListingCard => Boolean(c));
@@ -200,6 +212,18 @@ export async function getSimilarListings(
   listing: Listing,
   limit = 4,
 ): Promise<ListingCard[]> {
+  if (useDb()) {
+    const rows = await prisma.listing.findMany({
+      where: {
+        id: { not: listing.id },
+        status: "LIVE",
+        OR: [{ make: listing.make }, { bodyType: listing.bodyType }],
+      },
+      include: listingInclude,
+      take: limit,
+    });
+    return rows.map(toCard);
+  }
   return CARDS.filter(
     (c) =>
       c.id !== listing.id &&
@@ -210,6 +234,7 @@ export async function getSimilarListings(
 }
 
 export async function getBidsForAuction(auctionId: string): Promise<Bid[]> {
+  if (useDb()) return dbRead.prismaGetBids(auctionId);
   return BIDS_BY_AUCTION[auctionId] ?? [];
 }
 
@@ -220,12 +245,14 @@ export async function getBidsForAuction(auctionId: string): Promise<Bid[]> {
 export async function getReservePrice(
   auctionId: string,
 ): Promise<number | undefined> {
+  if (useDb()) return dbRead.prismaGetReserve(auctionId);
   return RESERVES[auctionId];
 }
 
 export async function getInspectionByToken(
   token: string,
 ): Promise<Inspection | null> {
+  if (useDb()) return dbRead.prismaGetInspectionByToken(token);
   for (const l of LISTINGS) {
     if (l.inspection?.publicToken === token) return l.inspection;
   }
@@ -235,6 +262,7 @@ export async function getInspectionByToken(
 export async function getInspectionByReference(
   reference: string,
 ): Promise<Inspection | null> {
+  if (useDb()) return dbRead.prismaGetInspectionByReference(reference);
   for (const l of LISTINGS) {
     if (l.inspection?.reference === reference) return l.inspection;
   }
@@ -243,6 +271,7 @@ export async function getInspectionByReference(
 
 /** A representative completed report used as the public sample. */
 export async function getSampleInspection(): Promise<Inspection | null> {
+  if (useDb()) return dbRead.prismaGetSampleInspection();
   const best = LISTINGS.filter((l) => l.inspection).sort(
     (a, b) => (b.inspection!.overallScore ?? 0) - (a.inspection!.overallScore ?? 0),
   )[0];
@@ -250,19 +279,26 @@ export async function getSampleInspection(): Promise<Inspection | null> {
 }
 
 export async function getSeller(id: string): Promise<PublicUser | null> {
+  if (useDb()) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    return user ? toPublicUser(user) : null;
+  }
   return SELLERS.find((s) => s.id === id) ?? null;
 }
 
 export async function getStats(): Promise<PlatformStats> {
+  if (useDb()) return dbRead.prismaGetStats();
   return STATS;
 }
 
 export async function getTestimonials() {
+  if (useDb()) return [];
   return TESTIMONIALS;
 }
 
 /** Facet counts for the filter rail. */
 export async function getFacets(query: ListingQuery = {}) {
+  if (useDb()) return dbRead.prismaFacets(query);
   const pool = CARDS.filter((c) => matchesQuery(c, { ...query, make: undefined }));
   const count = <K extends keyof ListingCard>(key: K) => {
     const map = new Map<string, number>();
@@ -288,6 +324,7 @@ export async function getFacets(query: ListingQuery = {}) {
 export async function suggest(q: string, limit = 8): Promise<
   { type: "make" | "model" | "city" | "listing"; label: string; href: string }[]
 > {
+  if (useDb()) return dbRead.prismaSuggest(q, limit);
   const needle = q.trim().toLowerCase();
   if (!needle) return [];
 
@@ -321,4 +358,48 @@ export async function suggest(q: string, limit = 8): Promise<
   }
 
   return out.slice(0, limit);
+}
+
+export async function getAccountSnapshot(userId: string) {
+  if (!useDb()) {
+    return {
+      bids: 0,
+      leading: 0,
+      watching: 0,
+      inspections: 0,
+      listings: [] as ListingCard[],
+      bidLots: [] as ListingCard[],
+      watched: [] as ListingCard[],
+      notifications: [] as { id: string; type: string; payload: unknown; createdAt: string; readAt: string | null }[],
+    };
+  }
+  const [bids, leading, watching, inspections, listings, notifications] = await Promise.all([
+    prisma.bid.findMany({ where: { bidderId: userId }, distinct: ["auctionId"], select: { auctionId: true } }),
+    prisma.auction.count({ where: { leaderId: userId, status: "LIVE" } }),
+    prisma.watchlist.count({ where: { userId } }),
+    prisma.inspection.count({ where: { customerId: userId } }),
+    prisma.listing.findMany({ where: { sellerId: userId }, include: listingInclude, orderBy: { createdAt: "desc" } }),
+    prisma.notification.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 20 }),
+  ]);
+  const auctionIds = bids.map((bid) => bid.auctionId);
+  const bidLots = auctionIds.length
+    ? await prisma.listing.findMany({ where: { auction: { id: { in: auctionIds } } }, include: listingInclude })
+    : [];
+  const watched = await prisma.watchlist.findMany({ where: { userId }, include: { listing: { include: listingInclude } } });
+  return {
+    bids: bids.length,
+    leading,
+    watching,
+    inspections,
+    listings: listings.map(toCard),
+    bidLots: bidLots.map(toCard),
+    watched: watched.map((row) => toCard(row.listing)),
+    notifications: notifications.map((row) => ({
+      id: row.id,
+      type: row.type,
+      payload: row.payloadJson,
+      createdAt: row.createdAt.toISOString(),
+      readAt: row.readAt?.toISOString() ?? null,
+    })),
+  };
 }

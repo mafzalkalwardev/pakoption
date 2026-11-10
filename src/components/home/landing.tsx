@@ -157,9 +157,8 @@ export function LandingPage() {
             >
               INDUS Web Agency
             </a>
-            . Until a database adapter is connected, the auction and classifieds
-            pages render a built-in demo dataset so the interface can be
-            reviewed. Those cars are not a live inventory.
+            . Listings live in PostgreSQL. The optional demo seed is sample
+            data for an empty database, not a count of customers or sales.
           </p>
         </div>
       </section>

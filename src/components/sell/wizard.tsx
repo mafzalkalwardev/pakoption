@@ -271,25 +271,71 @@ export function SellWizard() {
   const inspectionPrice =
     INSPECTION_PACKAGES.find((p) => p.id === s.inspectionPackage)?.price ?? 0;
 
-  function addPhotos(n = 1) {
-    // Client-side preview only. Real upload goes to Supabase Storage via a
-    // signed URL — see todo.md M3.
-    setS((prev) => ({
-      ...prev,
-      photos: [
-        ...prev.photos,
-        ...Array.from({ length: n }, (_, i) => `photo-${prev.photos.length + i}`),
-      ].slice(0, 30),
-    }));
+  async function onFiles(list: FileList | null) {
+    if (!list?.length) return;
+    for (const file of Array.from(list).slice(0, 30 - s.photos.length)) {
+      const body = new FormData();
+      body.set("file", file);
+      const res = await fetch("/api/uploads", { method: "POST", body });
+      const json = (await res.json()) as { url?: string; error?: { message: string } };
+      if (!res.ok || !json.url) {
+        toast.error(json.error?.message ?? "Upload failed. Sign in and try again.");
+        if (res.status === 401) window.location.href = "/login";
+        return;
+      }
+      setS((prev) => ({ ...prev, photos: [...prev.photos, json.url!].slice(0, 30) }));
+    }
   }
 
   async function submit() {
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1100));
+    const digitsOf = (value: string) => Number(value.replace(/[^\d]/g, "")) || 0;
+    const res = await fetch("/api/listings", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        make: s.make,
+        model: s.model,
+        variant: s.variant,
+        year: Number(s.year),
+        registrationCity: s.registrationCity,
+        mileageKm: digitsOf(s.mileageKm),
+        transmission: s.transmission,
+        fuelType: s.fuelType,
+        bodyType: s.bodyType,
+        assembly: s.assembly,
+        engineCc: digitsOf(s.engineCc),
+        colour: s.colour,
+        ownersCount: Number(s.ownersCount) || 1,
+        features: s.features,
+        photos: s.photos,
+        hasAccidentHistory: s.hasAccidentHistory,
+        accidentNotes: s.accidentNotes,
+        hasFloodDamage: s.hasFloodDamage,
+        serviceHistoryAvailable: s.serviceHistoryAvailable,
+        attestation: s.attestation,
+        type: s.type,
+        startingPrice: s.type === "AUCTION" ? digitsOf(s.startingPrice) : undefined,
+        reservePrice: s.reservePrice ? digitsOf(s.reservePrice) : undefined,
+        durationDays: s.durationDays,
+        askingPrice: s.type === "CLASSIFIED" ? digitsOf(s.askingPrice) : undefined,
+        isNegotiable: s.isNegotiable,
+        bookInspection: s.bookInspection,
+        inspectionPackage: s.inspectionPackage,
+        title: s.title || `${s.year} ${s.make} ${s.model} ${s.variant}`,
+        description: s.description,
+      }),
+    });
+    const json = (await res.json()) as { slug?: string; error?: { message: string } };
     setSubmitting(false);
+    if (!res.ok) {
+      toast.error(json.error?.message ?? "Could not submit the listing.");
+      if (res.status === 401) window.location.href = "/login";
+      return;
+    }
     setDone(true);
     toast.success("Listing submitted for review", {
-      description: "Most listings go live within 30 minutes.",
+      description: "An admin publishes it from the moderation queue.",
     });
   }
 
@@ -304,9 +350,7 @@ export function SellWizard() {
           Submitted for review
         </h2>
         <p className="mt-3 text-[15px] leading-relaxed text-muted">
-          We run automated checks for duplicate chassis numbers, stock
-          photography and price outliers, then a human takes a look. Most
-          listings are live within 30 minutes.
+          An admin reviews the listing in the moderation panel before it goes live.
         </p>
 
         <dl className="mt-7 space-y-3 rounded-xl border border-line bg-surface p-6 text-left text-sm">
@@ -574,9 +618,7 @@ export function SellWizard() {
                       Photos
                     </h2>
                     <p className="mt-2 text-[14px] text-muted">
-                      Eight minimum. Listings with the full guided set get
-                      roughly 40% more bids — natural light, no filters, and
-                      shoot the flaws too.
+                      Eight minimum, thirty maximum. JPG, PNG, or WebP, up to 10 MB each.
                     </p>
                   </div>
 
@@ -604,11 +646,19 @@ export function SellWizard() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => addPhotos(4)}
-                    className="flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-line py-14 transition-colors hover:border-brand-700 hover:bg-surface-2/40"
+                  <label
+                    className="flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-line py-14 transition-colors hover:border-brand-700 hover:bg-surface-2/40"
                   >
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      className="sr-only"
+                      onChange={(event) => {
+                        void onFiles(event.target.files);
+                        event.target.value = "";
+                      }}
+                    />
                     <ImagePlus className="size-8 text-muted-2" aria-hidden />
                     <span className="text-[14px] font-medium text-ivory">
                       Drag photos here, or click to browse
@@ -616,7 +666,7 @@ export function SellWizard() {
                     <span className="text-[12.5px] text-muted-2">
                       JPG or PNG · up to 10 MB each · {s.photos.length}/30 added
                     </span>
-                  </button>
+                  </label>
 
                   {s.photos.length > 0 && (
                     <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
@@ -625,9 +675,15 @@ export function SellWizard() {
                           key={p}
                           className="group relative aspect-[4/3] overflow-hidden rounded-md border border-line bg-ink-2"
                         >
-                          <span className="grid h-full place-items-center">
-                            <Camera className="size-5 text-muted-2" aria-hidden />
-                          </span>
+                          {p.startsWith("/") || p.startsWith("http") ? (
+                            // Uploaded files are served from this app.
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={p} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <span className="grid h-full place-items-center">
+                              <Camera className="size-5 text-muted-2" aria-hidden />
+                            </span>
+                          )}
                           {i === 0 && (
                             <span className="absolute left-1.5 top-1.5">
                               <Badge variant="solid" size="sm">

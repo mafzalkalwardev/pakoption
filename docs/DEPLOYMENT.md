@@ -1,130 +1,143 @@
-# Deploying PakOption on Ubuntu ARM64
+# Deploying PakOption on Ubuntu 24.04 (ARM64 or x86_64)
 
-PakOption is a Next.js 15 App Router app. Serve it with `next start` behind nginx. Do not use `output: "export"`.
+PakOption is a Next.js 15 app backed by PostgreSQL on the same machine. Serve it with `next start` on `127.0.0.1:3000` behind nginx. Do not use `output: "export"`: the app has Route Handlers, sessions, and uploads.
 
-A static export cannot host this app. It has Route Handlers (`/api/auctions`, `/api/bids`, `/api/search/suggest`, `/api/cron/close-auctions`, `/api/stats`, `/llms.txt`, `/llms-full.txt`), `revalidate` on listing pages, and response headers from `next.config.ts`.
+No paid database, auth provider, or payment gateway is required.
 
-The process listens on `127.0.0.1:3000`. nginx terminates TLS and proxies to that port. No database is required for the site to boot.
-
-## What runs without a backend
-
-Pages read a built-in dataset in `src/lib/db/seed-data.ts` through `src/lib/db/repository.ts`. Cars on `/auctions` and `/buy` are that demo dataset, not a live inventory.
-
-`prisma/schema.prisma` and `prisma/seed.ts` are in the repo. The repository does not import Prisma. Setting `DATABASE_URL` does not switch page reads to Postgres, and `POST /api/bids` runs the auction engine without storing the bid. Auth screens exist; no session provider is connected. Photo upload in the sell wizard stays in the browser.
-
-You do not need Postgres, Supabase, or an auth provider to serve the public site.
-
-## Host
-
-- Ubuntu, `aarch64` / ARM64
-- Node.js 20 or newer (the `linux-arm64` build)
-- nginx
-- systemd
-
-Check the machine:
+## 1. Packages
 
 ```bash
-uname -m          # aarch64
-node -v           # v20+ 
+sudo apt-get update
+sudo apt-get install -y nginx postgresql postgresql-contrib curl
+# Node.js 20+ for linux-arm64 or linux-x64 from https://nodejs.org
+node -v
+uname -m
 ```
 
-## Environment
-
-`NEXT_PUBLIC_*` values are inlined at **build** time. Set the site URL before `npm run build`, then build again if the domain changes.
-
-| Variable | Required to boot | Purpose |
-|---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | No. Defaults to `https://pakoption.induswebagency.com` | Canonical URL, sitemap, robots, Open Graph, JSON-LD, `llms.txt` |
-| `DATABASE_URL` | No | Not read by the page data layer today |
-| `DIRECT_URL` | No | Intended for a future `prisma migrate` |
-| `AUTH_SECRET`, `AUTH_URL`, Google client | No | Auth.js is not wired |
-| `NEXT_PUBLIC_SUPABASE_URL`, Supabase keys | No | Storage and realtime are not wired |
-| `CRON_SECRET` | No | Only if you call `/api/cron/close-auctions` |
-| `RESEND_API_KEY`, `SMS_PROVIDER_KEY` | No | Notifications are not wired |
-
-Copy the example and set the public URL:
+## 2. Postgres
 
 ```bash
-cp .env.example .env
-# Edit NEXT_PUBLIC_SITE_URL. Leave DATABASE_URL unset.
+sudo -u postgres psql <<'SQL'
+CREATE ROLE pakoption LOGIN PASSWORD 'choose-a-password';
+CREATE DATABASE pakoption OWNER pakoption;
+SQL
 ```
 
-`.env.example` documents every variable. For this VPS, the file you actually need is:
+The role does not need to be a superuser. `prisma migrate dev` on a laptop needs `CREATEDB` for its shadow database. Production uses `prisma migrate deploy`, which does not.
+
+## 3. App checkout
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://pakoption.induswebagency.com
+sudo mkdir -p /opt/pakoption /var/lib/pakoption/uploads /var/www/pakoption-verify
+sudo chown -R "$USER":"$USER" /opt/pakoption /var/lib/pakoption/uploads
+cd /opt/pakoption
+git clone <repo> .
+git checkout <release>
 ```
 
-## Build (ARM64)
+Copy the search-console files into `/var/www/pakoption-verify/` (outside the app):
 
-From the repository root, as the user that will run the service:
+- `google*.html`
+- `BingSiteAuth.xml`
+- `ff82568606a8e2966f050af9a9ada4a1.txt`
+
+nginx serves those with exact-match (or a google-html regex) locations before the proxy. See `docs/deploy/nginx-pakoption.conf`.
+
+## 4. Environment
+
+```bash
+sudo cp .env.example /etc/pakoption.env
+sudo chmod 600 /etc/pakoption.env
+sudoedit /etc/pakoption.env
+```
+
+Required:
+
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | Postgres URL for the app |
+| `DIRECT_URL` | Same URL, used by Prisma migrations |
+| `NEXT_PUBLIC_SITE_URL` | `https://pakoption.induswebagency.com` — set before `next build` |
+| `AUTH_SECRET` | Signs nothing by itself; keep it set for future cookie hardening |
+| `CRON_SECRET` | Bearer token for `/api/cron/close-auctions` |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | First admin created by the seed |
+| `UPLOAD_DIR` | `/var/lib/pakoption/uploads` |
+
+Optional: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM`. If `SMTP_HOST` is empty, registration still works and mail is skipped.
+
+Also symlink the env into the app so `next build` and Prisma can see it:
+
+```bash
+ln -sf /etc/pakoption.env /opt/pakoption/.env
+```
+
+## 5. Build and migrate
 
 ```bash
 cd /opt/pakoption
 npm ci
-NEXT_PUBLIC_SITE_URL=https://pakoption.induswebagency.com npm run build
+set -a && . /etc/pakoption.env && set +a
+npx prisma migrate deploy
+npm run db:seed          # admin user only
+# SEED_DEMO=1 npm run db:seed   # also load sample cars
+npm run build
 ```
 
-`npm ci` runs `prisma generate`. On ARM64, Prisma downloads the `linux-arm64` query engine. That step needs outbound network access during install. The running site does not open a database connection.
+`NEXT_PUBLIC_SITE_URL` is inlined at build time. Rebuild if the domain changes.
 
-## Run
-
-```bash
-NEXT_PUBLIC_SITE_URL=https://pakoption.induswebagency.com \
-  npx next start -H 127.0.0.1 -p 3000
-```
-
-Confirm:
-
-```bash
-curl -sI http://127.0.0.1:3000/ | head
-curl -s http://127.0.0.1:3000/ | grep -o '<h1[^>]*>.*</h1>'
-curl -s http://127.0.0.1:3000/robots.txt
-curl -s http://127.0.0.1:3000/sitemap.xml | head
-curl -s http://127.0.0.1:3000/llms.txt | head
-```
-
-## systemd
-
-`docs/deploy/pakoption.service` is the unit. Install it as root:
+## 6. systemd
 
 ```bash
 sudo cp docs/deploy/pakoption.service /etc/systemd/system/pakoption.service
+sudo cp docs/deploy/pakoption-cron.service /etc/systemd/system/pakoption-cron.service
+sudo cp docs/deploy/pakoption-cron.timer /etc/systemd/system/pakoption-cron.timer
 sudo systemctl daemon-reload
 sudo systemctl enable --now pakoption
-sudo systemctl status pakoption
+sudo systemctl enable --now pakoption-cron.timer
 ```
 
-The unit expects the repo at `/opt/pakoption` and Node on the `ubuntu` user's `PATH` via a login shell is **not** used. `ExecStart` calls `/usr/bin/npm`. If Node lives elsewhere, change `ExecStart` to the absolute `node` path:
+The web unit runs `npm run start -- -H 127.0.0.1 -p 3000` as `ubuntu` with `EnvironmentFile=/etc/pakoption.env`. The timer calls the close-auctions route every minute.
+
+If Node is not at `/usr/bin/npm`, change `ExecStart` to the absolute `node` binary:
 
 ```bash
 /usr/bin/node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3000
 ```
 
-Set `Environment=NEXT_PUBLIC_SITE_URL=...` in the unit as well. Because Next inlines `NEXT_PUBLIC_SITE_URL` at build time, the value in the unit must match the value used for `npm run build`.
-
-## nginx
-
-`docs/deploy/nginx-pakoption.conf` proxies `pakoption.induswebagency.com` to `127.0.0.1:3000`.
+## 7. nginx
 
 ```bash
 sudo cp docs/deploy/nginx-pakoption.conf /etc/nginx/sites-available/pakoption
-sudo ln -s /etc/nginx/sites-available/pakoption /etc/nginx/sites-enabled/pakoption
+sudo ln -sf /etc/nginx/sites-available/pakoption /etc/nginx/sites-enabled/pakoption
 sudo nginx -t && sudo systemctl reload nginx
-```
-
-Issue the certificate after DNS points at the VPS:
-
-```bash
 sudo certbot --nginx -d pakoption.induswebagency.com
 ```
 
-The app is not a static file tree. Do not point nginx at `docs/` or `out/`. `docs/index.html` is an old static mock and is marked `noindex`.
+`/uploads/` is aliased to `/var/lib/pakoption/uploads`. The verification filenames are not proxied to Next.js.
 
-## Smoke checks after TLS
+## 8. Checks
 
-- `https://pakoption.induswebagency.com/` has one `<h1>` and a canonical link to that origin
-- `/robots.txt` allows GPTBot, ClaudeBot, PerplexityBot, Google-Extended, and Bingbot, and disallows `/dashboard`, `/api/`, `/inspection/report/`, `/login`, and `/register`
-- `/sitemap.xml` lists absolute URLs on `https://pakoption.induswebagency.com`
-- `/llms.txt` and `/llms-full.txt` return `text/plain`
-- `/opengraph-image` (or the image URL in the homepage `<meta property="og:image">`) is a 1200×630 PNG
+```bash
+curl -fsS http://127.0.0.1:3000/ | grep -o '<h1[^>]*>.*</h1>'
+curl -fsS -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3000/api/cron/close-auctions
+curl -fsS http://127.0.0.1:3000/robots.txt | head
+curl -fsS http://127.0.0.1:3000/sitemap.xml | head
+```
+
+## 9. Tests
+
+```bash
+createdb pakoption_test   # or use the CI service in .github/workflows/test.yml
+DATABASE_URL=postgresql://pakoption:PASSWORD@127.0.0.1:5432/pakoption_test \
+DIRECT_URL=postgresql://pakoption:PASSWORD@127.0.0.1:5432/pakoption_test \
+  npx prisma migrate deploy
+DATABASE_URL=postgresql://pakoption:PASSWORD@127.0.0.1:5432/pakoption_test \
+DIRECT_URL=postgresql://pakoption:PASSWORD@127.0.0.1:5432/pakoption_test \
+  npm test
+```
+
+`npm test` covers registration, a rejected login, listing creation, approval, a persisted bid, a rejected self-bid, and auction close when the reserve is not met.
+
+## What is intentionally not wired
+
+Google sign-in, SMS OTP, card payments, and Supabase are not used. Email is local SMTP. Payments are bank transfer or cash, marked by an admin. Phone and CNIC tiers are set by an admin. Live bidder counts on the old marketing pages are not shown.

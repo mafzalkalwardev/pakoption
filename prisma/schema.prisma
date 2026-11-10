@@ -192,6 +192,10 @@ model User {
   auditLogs     AuditLog[]
 
   leadingAuctions Auction[] @relation("AuctionLeader")
+  sessions        Session[]
+
+  resetTokenHash      String?
+  resetTokenExpiresAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -556,6 +560,17 @@ model Notification {
   createdAt DateTime  @default(now())
 
   @@index([userId, readAt])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model AuditLog {

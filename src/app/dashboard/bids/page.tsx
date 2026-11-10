@@ -4,14 +4,19 @@ import { Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Countdown } from "@/components/auction/countdown";
-import { getLiveAuctions } from "@/lib/db/repository";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth/session";
+import { getAccountSnapshot } from "@/lib/db/repository";
 import { formatPKR } from "@/lib/format";
 
 export const metadata: Metadata = { title: "My bids" };
 export const dynamic = "force-dynamic";
 
 export default async function MyBidsPage() {
-  const lots = await getLiveAuctions(6);
+  const session = await getSession();
+  if (!session) redirect("/login");
+  const account = await getAccountSnapshot(session.id);
+  const lots = account.bidLots;
 
   return (
     <div>
@@ -35,9 +40,9 @@ export default async function MyBidsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
-            {lots.map((l, i) => {
-              const leading = i % 3 === 0;
+            {lots.map((l) => {
               const price = l.auction?.currentPrice ?? 0;
+              const leading = l.auction?.leaderHandle === session.handle;
               return (
                 <tr key={l.id} className="transition-colors hover:bg-surface-2/50">
                   <td className="px-4 py-3.5">
@@ -57,9 +62,7 @@ export default async function MyBidsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3.5 text-right">
-                    <span className="font-mono text-ivory tnum">
-                      {formatPKR(leading ? price + 150_000 : price - 50_000)}
-                    </span>
+                    <span className="font-mono text-ivory tnum">Private</span>
                   </td>
                   <td className="px-4 py-3.5 text-right">
                     {l.auction && (

@@ -130,6 +130,39 @@ export const listingSchema = identitySchema
   .merge(photosSchema)
   .merge(descriptionSchema);
 
+export const publishListingSchema = identitySchema
+  .merge(conditionSchema)
+  .merge(descriptionSchema)
+  .extend({
+    photos: z.array(z.string().min(1)).min(8).max(30),
+    hasAccidentHistory: z.boolean(),
+    accidentNotes: z.string().max(1000).optional(),
+    hasFloodDamage: z.boolean(),
+    serviceHistoryAvailable: z.boolean(),
+    auctionSheetGrade: z.string().max(10).optional(),
+    attestation: z.literal(true),
+    type: z.enum(["AUCTION", "CLASSIFIED"]),
+    startingPrice: z.number().int().min(50_000).optional(),
+    reservePrice: z.number().int().min(0).optional(),
+    durationDays: z.number().int().optional(),
+    askingPrice: z.number().int().min(50_000).optional(),
+    isNegotiable: z.boolean().default(true),
+    bookInspection: z.boolean().optional(),
+    inspectionPackage: z.enum(["BASIC", "STANDARD", "COMPREHENSIVE"]).optional(),
+  })
+  .refine((d) => d.type !== "AUCTION" || (d.startingPrice !== undefined && d.durationDays !== undefined), {
+    message: "Set a starting bid and a duration",
+    path: ["startingPrice"],
+  })
+  .refine((d) => d.type !== "CLASSIFIED" || d.askingPrice !== undefined, {
+    message: "Set an asking price",
+    path: ["askingPrice"],
+  })
+  .refine((d) => !d.hasAccidentHistory || (d.accidentNotes?.trim().length ?? 0) >= 20, {
+    message: "Describe the accident",
+    path: ["accidentNotes"],
+  });
+
 export type IdentityInput = z.infer<typeof identitySchema>;
 export type ConditionInput = z.infer<typeof conditionSchema>;
 export type DisclosureInput = z.infer<typeof disclosureSchema>;

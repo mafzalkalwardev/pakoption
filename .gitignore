@@ -39,6 +39,10 @@ yarn-error.log*
 /prisma/migrations/dev.db*
 /prisma/*.db
 
+# uploaded listing photos
+/public/uploads/*
+!/public/uploads/.gitkeep
+
 # testing
 /coverage
 /playwright-report

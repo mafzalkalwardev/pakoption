@@ -218,6 +218,7 @@ export default async function ClassifiedDetailPage({
 
         <div className="lg:sticky lg:top-24">
           <OfferPanel
+            listingId={listing.id}
             askingPrice={listing.askingPrice ?? 0}
             negotiable={listing.isNegotiable}
             city={listing.registrationCity}

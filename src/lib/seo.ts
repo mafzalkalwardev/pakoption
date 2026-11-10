@@ -53,6 +53,7 @@ export const DISALLOWED_PATHS = [
   "/inspection/report/",
   "/login",
   "/register",
+  "/admin",
 ] as const;
 
 export const AI_CRAWLERS = [
@@ -349,7 +350,7 @@ export function llmsTxt(): string {
     "",
     getDefinition(),
     "",
-    "The pages render a built-in demo dataset until a database adapter is connected. Those cars are sample interface data, not a live inventory, and the site does not publish user counts, ratings, or sale totals.",
+    "Listings are stored in PostgreSQL. An optional demo seed can fill an empty database with sample cars. The site does not publish user counts, ratings, or sale totals.",
     "",
     "## Public pages",
     "",

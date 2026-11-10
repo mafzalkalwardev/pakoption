@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import { withCanonical } from "@/lib/seo";
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
-import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/primitives";
+import { RegisterForm } from "@/components/auth/register-form";
 
 export const metadata: Metadata = withCanonical("/register", {
   title: "Create an account",
   description:
-    "Registration screen for PakOption. An auth provider is not connected in the default configuration.",
+    "Create a PakOption account with your email and a password.",
   robots: { index: false, follow: false },
 });
 
@@ -34,84 +32,10 @@ export default function RegisterPage() {
           Create your account
         </h1>
         <p className="mt-2 text-[14px] text-muted">
-          Takes about a minute. We&rsquo;ll verify your number before your first
-          bid.
+          Email and password. An admin can record phone or CNIC verification later.
         </p>
 
-        <form className="mt-8 space-y-4">
-          <div>
-            <Label htmlFor="r-name">Full name</Label>
-            <Input id="r-name" autoComplete="name" placeholder="Afzal Jani" />
-          </div>
-
-          <div>
-            <Label htmlFor="r-email">Email</Label>
-            <Input
-              id="r-email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@example.com"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="r-phone">Mobile number</Label>
-            <Input
-              id="r-phone"
-              type="tel"
-              autoComplete="tel"
-              placeholder="03XX XXXXXXX"
-            />
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="r-pass">Password</Label>
-              <Input
-                id="r-pass"
-                type="password"
-                autoComplete="new-password"
-                placeholder="••••••••"
-              />
-            </div>
-            <div>
-              <Label htmlFor="r-pass2">Confirm</Label>
-              <Input
-                id="r-pass2"
-                type="password"
-                autoComplete="new-password"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
-
-          <label className="flex cursor-pointer items-start gap-2.5">
-            <Checkbox id="r-terms" className="mt-0.5" />
-            <span className="text-[12.5px] leading-relaxed text-muted">
-              I accept the{" "}
-              <Link href="/legal/terms" className="text-brand-400 hover:underline">
-                terms
-              </Link>
-              ,{" "}
-              <Link href="/legal/privacy" className="text-brand-400 hover:underline">
-                privacy policy
-              </Link>{" "}
-              and{" "}
-              <Link
-                href="/legal/auction-rules"
-                className="text-brand-400 hover:underline"
-              >
-                auction rules
-              </Link>
-              . I understand bids are binding.
-            </span>
-          </label>
-
-          <Button type="submit" size="lg" className="w-full">
-            Create account
-            <ArrowRight />
-          </Button>
-        </form>
+        <RegisterForm />
 
         <p className="mt-8 text-center text-[13.5px] text-muted">
           Already have an account?{" "}

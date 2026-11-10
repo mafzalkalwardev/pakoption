@@ -84,11 +84,31 @@ export function BookingFlow() {
 
   async function submit() {
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 900));
+    const res = await fetch("/api/inspections", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        packageId: pkg,
+        city,
+        isDoorstep: doorstep,
+        address,
+        scheduledDate: date,
+        scheduledSlot: slot,
+        name,
+        phone,
+        listingId: presetListing ?? undefined,
+        notes,
+      }),
+    });
+    const json = (await res.json()) as { reference?: string; error?: { message: string } };
     setSubmitting(false);
-    const ref = `PO-INS-2026-${Math.floor(10000 + Math.random() * 89999)}`;
-    setReference(ref);
-    toast.success("Inspection booked", { description: ref });
+    if (!res.ok || !json.reference) {
+      toast.error(json.error?.message ?? "Could not book the inspection.");
+      if (res.status === 401) window.location.href = "/login";
+      return;
+    }
+    setReference(json.reference);
+    toast.success("Inspection booked", { description: json.reference });
   }
 
   /* ---------------------------------------------------------------- done */

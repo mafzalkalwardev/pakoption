@@ -22,8 +22,14 @@ import { cn } from "@/lib/utils";
 export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = React.useState(false);
+  const [accountName, setAccountName] = React.useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const match = document.cookie.match(/(?:^|; )po_name=([^;]*)/);
+    setAccountName(match ? decodeURIComponent(match[1]!) : null);
+  }, [pathname]);
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -137,17 +143,21 @@ export function Navbar() {
               </Link>
             </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="hidden sm:inline-flex"
-            >
-              <Link href="/login">
-                <User />
-                Sign in
-              </Link>
-            </Button>
+            {accountName ? (
+              <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
+                <Link href="/dashboard">
+                  <User />
+                  {accountName}
+                </Link>
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
+                <Link href="/login">
+                  <User />
+                  Sign in
+                </Link>
+              </Button>
+            )}
 
             <Button size="sm" asChild className="hidden sm:inline-flex">
               <Link href="/sell/new">

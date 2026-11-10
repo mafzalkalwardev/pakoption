@@ -25,10 +25,12 @@ function monthlyInstalment(principal: number, annualRate: number, months: number
 }
 
 export function OfferPanel({
+  listingId,
   askingPrice,
   negotiable,
   city,
 }: {
+  listingId: string;
   askingPrice: number;
   negotiable: boolean;
   city: string;
@@ -53,12 +55,22 @@ export function OfferPanel({
 
   async function send() {
     setSending(true);
-    await new Promise((r) => setTimeout(r, 600));
+    const res = await fetch("/api/offers", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ listingId, amount, message }),
+    });
+    const json = (await res.json()) as { error?: { message: string } };
     setSending(false);
+    if (!res.ok) {
+      toast.error(json.error?.message ?? "Could not send the offer.");
+      if (res.status === 401) window.location.href = "/login";
+      return;
+    }
     setRaw("");
     setMessage("");
     toast.success("Offer sent", {
-      description: `The seller has 48 hours to accept, decline or counter your offer of ${formatPKR(amount)}.`,
+      description: `The seller has 48 hours to accept or decline your offer of ${formatPKR(amount)}.`,
     });
   }
 
@@ -233,8 +245,21 @@ export function OfferPanel({
           variant="secondary"
           className="w-full"
           onClick={() => {
-            setWatching((w) => !w);
-            toast.success(watching ? "Removed from watchlist" : "Added to watchlist");
+            void fetch("/api/watchlist", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ listingId }),
+            }).then(async (res) => {
+              if (res.status === 401) {
+                window.location.href = "/login";
+                return;
+              }
+              const json = (await res.json()) as { watching?: boolean };
+              if (res.ok && typeof json.watching === "boolean") {
+                setWatching(json.watching);
+                toast.success(json.watching ? "Added to watchlist" : "Removed from watchlist");
+              }
+            });
           }}
         >
           <Heart className={cn(watching && "fill-danger text-danger")} />
